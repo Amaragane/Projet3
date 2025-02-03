@@ -1,5 +1,6 @@
 ﻿using Xunit;
-
+using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
+using P3AddNewFunctionalityDotNetCore.Controllers;
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
     public class ProductServiceTests
@@ -13,7 +14,14 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         public void ExampleMethod()
         {
             // Arrange
-
+            ProductViewModel product = new ProductViewModel();
+            product.Id = 42;
+            product.Name = "test";
+            product.Description = "produit de test";
+            product.Stock = "125";
+            product.Price = "9999";
+            product.Details = "details du produits test";
+            Create(product);
             // Act
 
 
