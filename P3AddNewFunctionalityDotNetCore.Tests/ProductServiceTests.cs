@@ -1,8 +1,15 @@
-﻿using Xunit;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Xunit;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
 using P3AddNewFunctionalityDotNetCore.Controllers;
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
+    public class CustomeUnitsTestsFixture : WebApplicationFactory<Program>
+    {
+
+    }
     public class ProductServiceTests
     {
         /// <summary>
@@ -21,7 +28,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             product.Stock = "125";
             product.Price = "9999";
             product.Details = "details du produits test";
-            Create(product);
+
             // Act
 
 
