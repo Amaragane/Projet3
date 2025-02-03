@@ -1,7 +1,13 @@
-﻿using Xunit;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Xunit;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
+    public class CustomeUnitsTestsFixture : WebApplicationFactory<Program>
+    {
+
+    }
     public class ProductServiceTests
     {
         /// <summary>
