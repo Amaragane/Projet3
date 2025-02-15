@@ -82,3 +82,4 @@ app.MapControllerRoute(
 await IdentitySeedData.EnsurePopulated(app);
 
 app.Run();
+public partial class Program { }
