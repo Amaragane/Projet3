@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection.Metadata;
 using System.Net.Http.Json;
+using System.Collections.Generic;
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
     
@@ -28,7 +29,6 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         {
             _factory = factory;
             _client = _factory.CreateClient();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _client.BaseAddress=new Uri("http://localhost:60700/");
         }
         private async Task AuthenticateAsAdmin()
@@ -39,9 +39,12 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Password = "P@ssword123",
                 ReturnUrl = "/"
             };
-
-            StringContent requestContent = new StringContent(JsonConvert.SerializeObject(content), Encoding.UTF8, "application/json");
-            var response = await _client.PostAsJsonAsync("Account/Login", requestContent);
+            var formData = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("Name", "Admin"),
+            new KeyValuePair<string, string>("Password", "P@ssword123")
+            };
+            var data = new FormUrlEncodedContent(formData);
+            var response = await _client.PostAsync("Account/Login", data);
             response.EnsureSuccessStatusCode();
 
         }
@@ -49,32 +52,41 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         public async void CreateProductTest()
         {
             // Arrange
+            
             await AuthenticateAsAdmin();
-            ProductViewModel product = new ProductViewModel();
-            product.Name = "test";
-            product.Description = "produit de test";
-            product.Stock = "125";
-            product.Price = "9999";
-            product.Details = "details du produits test";
+            var formData = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("Name", "test"),
+            new KeyValuePair<string, string>("Description", "produit de test"),
+            new KeyValuePair<string, string>("Stock", "125"),
+            new KeyValuePair<string, string>("Price", "9999"),
+            new KeyValuePair<string, string>("Details", "details du produits test")
+            };
 
-
-            var json = new StringContent(JsonConvert.SerializeObject(product), Encoding.UTF8, "application/json");
-            //var data = new StringContent(json,Encoding.UTF8, "application/json");
-
-
-
+            var data = new FormUrlEncodedContent(formData);
+            
             // Act
 
-            var response = await _client.PostAsJsonAsync("Product/Create", json);
+            var response = await _client.PostAsync("Product/Create", data);
             var allProducts =await _client.GetStringAsync("Product/Index");
             // Assert
             Assert.Contains("test", allProducts);
-            
         }
         [Fact]
         public async void DeleteProductTest()
         {
-            var client = _factory.CreateClient();
+
+            
+            await AuthenticateAsAdmin();
+
+            var allProducts = await _client.GetStringAsync("Product/Index");
+            Assert.Contains("id=\"1\"", allProducts);
+            var formData = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("id", "1")
+            };
+            var data = new FormUrlEncodedContent(formData);
+            await _client.PostAsync("Product/DeleteProduct",data);
+            allProducts = await _client.GetStringAsync("Product/Index");
+            Assert.DoesNotContain("id=\"1\"", allProducts);
         }
 
         // TODO write test methods to ensure a correct coverage of all possibilities
