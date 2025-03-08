@@ -17,16 +17,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             SeedDatabase(context);
 
         }
-        public static void Cleanup(P3Referential context)
-        {
-            var products = context.Product.ToList();
-            context.Product.RemoveRange(products);
-            var orders = context.Order.ToList();
-            context.Order.RemoveRange(orders);
-            var orderLines = context.OrderLine.ToList();
-            context.OrderLine.RemoveRange(orderLines);
 
-        }
         public static void SeedDatabase(P3Referential context)
         {
             if (context.Product.Any())

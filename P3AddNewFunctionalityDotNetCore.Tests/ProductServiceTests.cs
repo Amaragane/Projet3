@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Reflection.Metadata;
 using System.Net.Http.Json;
 using System.Collections.Generic;
+using System.Xml.Linq;
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
     
@@ -33,12 +34,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         }
         private async Task AuthenticateAsAdmin()
         {
-            var content = new LoginModel
-            {
-                Name = "Admin",
-                Password = "P@ssword123",
-                ReturnUrl = "/"
-            };
+
             var formData = new List<KeyValuePair<string, string>> {
             new KeyValuePair<string, string>("Name", "Admin"),
             new KeyValuePair<string, string>("Password", "P@ssword123")
@@ -49,7 +45,26 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
         }
         [Fact]
-        public async void CreateProductTest()
+        public async Task DoNotAuthenticateAsAdminTest()
+        {
+            // Arrange
+            
+            var formData = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("Name", "Test"),
+            new KeyValuePair<string, string>("Password", "Test")
+            };
+            var data = new FormUrlEncodedContent(formData);
+            // Act
+            await _client.PostAsync("Account/Logout", null);
+            var response = await _client.PostAsync("Account/Login", data);
+            var index = await response.Content.ReadAsStringAsync();
+            // Assert
+            Assert.Contains("Invalid name or password", index);
+
+        }
+
+        [Fact]
+        public async Task CreateProductTest()
         {
             // Arrange
             
@@ -68,27 +83,34 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
             var response = await _client.PostAsync("Product/Create", data);
             var allProducts =await _client.GetStringAsync("Product/Index");
+
             // Assert
             Assert.Contains("test", allProducts);
         }
         [Fact]
-        public async void DeleteProductTest()
+        public async Task DeleteProductTest()
         {
 
-            
+            // Arrange
             await AuthenticateAsAdmin();
 
-            var allProducts = await _client.GetStringAsync("Product/Index");
-            Assert.Contains("id=\"1\"", allProducts);
+            
+            
             var formData = new List<KeyValuePair<string, string>> {
             new KeyValuePair<string, string>("id", "1")
             };
             var data = new FormUrlEncodedContent(formData);
+            // Act
             await _client.PostAsync("Product/DeleteProduct",data);
-            allProducts = await _client.GetStringAsync("Product/Index");
+            var allProductsInitial = await _client.GetStringAsync("Product/Index");
+            var allProducts = await _client.GetStringAsync("Product/Admin");
+            
+            
+            // Assert
+            Assert.Contains("id=\"1\"", allProductsInitial);
             Assert.DoesNotContain("id=\"1\"", allProducts);
         }
 
-        // TODO write test methods to ensure a correct coverage of all possibilities
+  
     }
 }
