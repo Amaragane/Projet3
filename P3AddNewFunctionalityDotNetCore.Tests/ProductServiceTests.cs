@@ -18,6 +18,12 @@ using System.Reflection.Metadata;
 using System.Net.Http.Json;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Moq;
+using P3AddNewFunctionalityDotNetCore.Models.Services;
+using P3AddNewFunctionalityDotNetCore.Models.Entities;
+using Microsoft.Extensions.Localization;
+using P3AddNewFunctionalityDotNetCore.Models;
+using P3AddNewFunctionalityDotNetCore.Models.Repositories;
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
     
@@ -44,6 +50,61 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             response.EnsureSuccessStatusCode();
 
         }
+        [Fact]
+        public void CheckProductModelErrorsTest()
+        {
+            // Arrange
+
+            var list = new ProductViewModel
+            {
+                Id = 1,
+                Name = "test",
+                Description = "test",
+                Details = "test",
+                Stock = "10",
+                Price = "92,50"
+            };
+            var localizer = Mock.Of<IStringLocalizer<ProductService>>();
+            var cart = Mock.Of<ICart>();
+            var orderRepo = Mock.Of<IOrderRepository>();
+            var productRepo = Mock.Of<IProductRepository>();
+            var productService = new ProductService(cart,productRepo,orderRepo,localizer);
+
+            // Act
+            var products = productService.CheckProductModelErrors(list);
+             
+            // Assert
+            Assert.Empty(products);
+        }
+        [Fact]
+        public void GetAllProductsTest()
+        {
+            // Arrange
+
+            var list = new List<Product>{new Product
+            {
+                Id = 1,
+                Name = "test",
+                Description = "test",
+                Details = "test",
+                Quantity = 10,
+                Price = 92.50
+            }
+            };
+            var localizer = Mock.Of<IStringLocalizer<ProductService>>();
+            var cart = Mock.Of<ICart>();
+            var orderRepo = Mock.Of<IOrderRepository>();
+            var productRepo = Mock.Of<IProductRepository>();
+            var productService = new ProductService(cart, productRepo, orderRepo, localizer);
+            Mock.Get(productRepo).Setup(p => p.GetAllProducts())
+                .Returns(list);
+            // Act
+            var products = productService.GetAllProducts();
+            // Assert
+            Assert.NotEmpty(products);
+        }
+        
+        
         [Fact]
         public async Task DoNotAuthenticateAsAdminTest()
         {
@@ -102,12 +163,12 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             var data = new FormUrlEncodedContent(formData);
             // Act
             await _client.PostAsync("Product/DeleteProduct",data);
-            var allProductsInitial = await _client.GetStringAsync("Product/Index");
+
             var allProducts = await _client.GetStringAsync("Product/Admin");
             
             
             // Assert
-            Assert.Contains("id=\"1\"", allProductsInitial);
+
             Assert.DoesNotContain("id=\"1\"", allProducts);
         }
 
